@@ -82,6 +82,12 @@ def setup_arg_parser():
         help="Evaluation parameter:Minimum classification score for which a detection is considered in the evaluation.")
 
     arg_parser.add_argument(
+        "--previous_model_weights",
+        type=str,
+        help="Filepath to previously trained model weights (.pth file)")
+
+
+    arg_parser.add_argument(
         '--savefigdir',
         type=str,
         default='./savefig'

@@ -65,6 +65,10 @@ python train.py
 Evaluation is run in 3 steps: evaluating in-distribution dataset,
 evaluation out of distribution dataset, and then obtaining final FP@95, AUROC, and AUPRC metrics.
 
+We provide our trained model weights for download [here](https://drive.google.com/file/d/1bsO2ZaDdu9fwFK7dQ_tHFipfW2TA-ZXQ/view?usp=share_link).
+These weights can directly be loaded into evaluation using the `--previous_model_weights` argument in `apply_net.py`. Otherwise,
+the seed from training will be used to find the model weight path.
+
 In distribution dataset run:
 ```bash
 python apply_net.py 
@@ -75,6 +79,7 @@ python apply_net.py
 --random-seed 0 
 --image-corruption-level 0 
 --visualize 0
+--previous_model_weights /path/to/abet_fasterrcnn_voc.pth
 ```
 
 OOD dataset run:
@@ -87,6 +92,7 @@ python apply_net.py
 --random-seed 0 
 --image-corruption-level 0 
 --visualize 0
+--previous_model_weights /path/to/abet_fasterrcnn_voc.pth
 ```
 
 Final metrics:
@@ -94,3 +100,4 @@ Final metrics:
 python voc_coco_eval.py 
 --seed 0
 ```
+

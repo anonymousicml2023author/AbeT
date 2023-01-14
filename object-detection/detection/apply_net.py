@@ -16,6 +16,7 @@ from detectron2.engine import launch
 from detectron2.data import build_detection_test_loader, MetadataCatalog
 
 # Project imports
+import shutil
 from core.evaluation_tools.evaluation_utils import get_train_contiguous_id_to_test_thing_dataset_id_dict
 from core.setup import setup_config, setup_arg_parser
 from offline_evaluation import compute_average_precision, compute_ood_probabilistic_metrics
@@ -26,6 +27,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main(args):
     # Setup config
+    if args.previous_model_weights is not None:
+        print('Overwriting random seed')
+        args.random_seed = 999
+        os.makedirs(f'data/detection/configs/abe_t/random_seed_{args.random_seed}/', exist_ok=True)
+        shutil.copyfile(args.previous_model_weights, f'data/detection/configs/abe_t/random_seed_{args.random_seed}/model_final.pth')
     cfg = setup_config(args,
                        random_seed=args.random_seed,
                        is_testing=True)
