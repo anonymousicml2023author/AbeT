@@ -34,17 +34,23 @@ For more details about these OOD datasets, please check out the [MOS paper](http
 
 All remaining OOD datasets for CIFAR10/100 evaluations are automatically downloaded in our script to `./data`
 
-## 2. Model Training
+## 2. Installation
+The following will create and activate a conda environment.
+```
+conda env create -f environment.yml
+conda activate abet
+```
+
+## 3. Model Training
 
 To train a model, please run:
 ```
 python main.py --save-model-path <path you would like to save model weights to> --architecture <"resnet20" for CIFAR10/100 and "resnet101" for ImageNet-1k> --out-dataset <OOD dataset> --in-dataset <ID dataset>
 ```
 For reproducibility purposes, we host our pre-trained models in [a common Google Drive folder](https://drive.google.com/drive/folders/1foWuTJX_JmiGF7vPRTxlui4TMr7fa9EJ?usp=sharing).
-
 All AbeT results use the models with the `_learned_temperature.pth` postfix - as our method requires the use of a learned temperature.
 
-## 3. OOD Detection Evaluation
+## 4. OOD Detection Evaluation
 To evaluate a model using AbeT, please run:
 ```
 python main.py --load-model-path <path to model weights you would like to load> --architecture <"resnet20" for CIFAR10/100 and "resnet101" for ImageNet-1k> --out-dataset <OOD dataset> --in-dataset <ID dataset> --no-train --inference-mode ablated_energy

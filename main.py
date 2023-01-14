@@ -143,12 +143,7 @@ def get_datasets(data_dir, out_data_name, in_data_name, batch_size):
         test_set_in  = torchvision.datasets.CIFAR100(root=f'{data_dir}/cifar100', train=False, download=True, transform=test_transform)
     elif in_data_name == "Imagenet":
         train_set_in = torchvision.datasets.ImageFolder(f'{data_dir}/Imagenet/ILSVRC/Data/CLS-LOC/train/', transform=train_transform)
-        random_order = np.arange(len(train_set_in))
-        np.random.shuffle(random_order)
-        train_idx, test_idx = random_order[1000:], random_order[:1000]
-        test_set_in = torch.utils.data.Subset(train_set_in, test_idx)
-        test_set_in.dataset.transform = test_transform
-        train_set_in = torch.utils.data.Subset(train_set_in, train_idx)
+        test_set_in = torchvision.datasets.ImageFolder(f'{data_dir}/Imagenet/ILSVRC/Data/CLS-LOC/val/', transform=test_transform)
     elif in_data_name == "MNIST":
         train_set_in = torchvision.datasets.MNIST(root=f'{data_dir}/mnist', train=True, download=True, transform=train_transform)
         test_set_in  = torchvision.datasets.MNIST(root=f'{data_dir}/mnist', train=False, download=True, transform=test_transform)
@@ -163,8 +158,6 @@ def get_datasets(data_dir, out_data_name, in_data_name, batch_size):
         outlier_set  = torchvision.datasets.DTD(root=f'{data_dir}/Textures', download=True, transform=test_transform)
     else:
         raise Exception("Out data name not in allowed set: {}".format(out_data_name))
-    random_indices = np.random.choice(range(len(outlier_set)), len(test_set_in))
-    outlier_set = torch.utils.data.Subset(outlier_set, random_indices)
     outlier_loader       =  DataLoader(outlier_set,       batch_size=batch_size, shuffle=False, num_workers=4)
     
     test_indices      = list(range(len(test_set_in)))
@@ -196,6 +189,8 @@ def main():
         num_classes = 1000
     elif in_data_name == "MNIST":
         num_classes = 10
+    else:
+        raise ValueError(f"in-dataset needs to be one of CIFAR10/100, Imagenet, or MNIST.")
     batch_size       = args.batch_size
     
     train            = args.train
@@ -223,7 +218,7 @@ def main():
         os.makedirs(data_dir)
 
     if architecture == 'densenet':
-        underlying_net = densenet121(pretrained = True)
+        underlying_net = densenet121(pretrained = False)
     elif architecture == 'resnet101':
         underlying_net = KNOWN_MODELS['BiT-S-R101x1']()
     elif architecture == 'resnet20':
@@ -248,7 +243,7 @@ def main():
 
     optimizer = optim.SGD(parameters, lr = 0.1, momentum = 0.9, weight_decay = weight_decay)
     
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones = [100, 150, 180] if in_data_name != "Imagenet" else [20, 21, 22], gamma = 0.1)
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones = [100, 150, 180] if in_data_name != "Imagenet" else [20, 30], gamma = 0.1)
 
     # Load the model (capable of resuming training or inference)
     # from the checkpoint file
@@ -405,18 +400,19 @@ def main():
                 axs.append(ax)
 
 
+
             axs[0].hist(ood_test_abet_scores, color = 'r', bins = 100, density = True)
             axs[0].hist(id_test_abet_scores, color = 'b', bins = 100, density = True, range = (0, 60))
-            axs[0].set_title("|AbeT (Ours)|", fontsize = 18)
+            axs[0].set_title("|AbeT (Ours)|\nAUROC: {:.2f}".format(auroc), fontsize = 18)
 
             axs[1].hist(ood_test_energy_scores, color = 'r', bins = 100, density = True)
             axs[1].hist(id_test_energy_scores, color = 'b', bins = 100, density = True)
-            axs[1].set_title("|Energy|", fontsize = 18)
+            axs[1].set_title("|Energy Infused w/\nLearned Temperature\nAUROC: {:.2f}".format(calc_auroc(id_test_energy_scores, ood_test_energy_scores)), fontsize = 18)
             
 
-            axs[2].hist(id_test_temperature_scores, color = 'b', bins = 100, label = "OOD", density = True)
-            axs[2].hist(ood_test_temperature_scores, color = 'r', bins = 100, label= "In-Distribution", density = True)
-            axs[2].set_title("Learned Temperature", fontsize = 18)
+            axs[2].hist(id_test_temperature_scores, color = 'b', bins = 100, label = "In-Distribution", density = True)
+            axs[2].hist(ood_test_temperature_scores, color = 'r', bins = 100, label= "OOD", density = True)
+            axs[2].set_title("Learned Temperature\nAUROC: {:.2f}".format(calc_auroc(id_test_temperature_scores, ood_test_temperature_scores)), fontsize = 18)
             axs[2].legend(fontsize = 14)
             
             plt.savefig("pngs/{}_{}_histogram.png".format(out_data_name, in_data_name))
