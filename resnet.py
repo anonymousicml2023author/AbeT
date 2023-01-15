@@ -1,5 +1,6 @@
 '''
-Properly implemented ResNet-s for CIFAR10 as described in paper [1].
+Properly implemented ResNet-s for CIFAR10 as described in paper [1] directly 
+copied from https://github.com/akamaster/pytorch_resnet_cifar10/blob/master/resnet.py.
 
 The implementation and structure of this file is hugely influenced by [2]
 which is implemented for ImageNet and doesn't have option A for identity.
