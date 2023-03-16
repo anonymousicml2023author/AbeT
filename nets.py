@@ -72,13 +72,9 @@ class LearnedTemperatureClassificationNet(AbstractClassificationNet):
                 nn.Sigmoid()
             )
 
-        self.react_threshold = 0
-
     def forward(self, x):
         penultimate_representations = self.underlying_model(x)
         temperature = self.temperature(penultimate_representations.float()) + 1e-12
-        if self.react_threshold > 0:
-            penultimate_representations = penultimate_representations.clip(max = self.react_threshold)
         # Compute temperature
         logit_numerators = self.h(penultimate_representations)
 
