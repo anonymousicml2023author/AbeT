@@ -61,7 +61,7 @@ If you would like to reproduce Figure 2, run this with the flag `--tsne` and the
 
 # OOD Detection Results
 
-AbeT achieves state-of-the-art performance averaged on all standard OOD datasets in classification
+AbeT achieves state-of-the-art performance averaged on all standard OOD datasets in classification. Changes from our submission to ICML on OpenReview are bolded.
 
 ![results](pngs/table_1.png)
 
